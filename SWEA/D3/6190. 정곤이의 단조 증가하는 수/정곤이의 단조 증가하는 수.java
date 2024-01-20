@@ -22,11 +22,12 @@ public class Solution {
 
             for (int i = 0; i < N; i++) {
                 for (int j = i + 1; j < N; j++) {
+                    // 각 숫자별로 곱한 숫자를 아래 함수에 넣어서 확인
                     int a = arr[i] * arr[j];
                     if (increase(a)) {
                         sum = a;
                     }
-                    if (sum > max) {
+                    if (sum > max) { //최댓값 구하기
                         max = sum;
                     }
                 }
@@ -35,14 +36,17 @@ public class Solution {
         }
     }
 
-    public static boolean increase(int number) {
+    public static boolean increase(int number) { // 해당 숫자가 [단조 증가하는 수]인지 아닌지 판단하는 함수
         int minNum = Integer.MAX_VALUE;
         int count = 0;
         int b = number;
+        // 숫자의 자릿수 구하기
         while (number > 0) {
             number /= 10;
             count++;
         }
+        // 숫자의 자리수만큼 돌면서 해당 숫자가 오름차순으로 되어있는가 확인
+        // 오름차순(ex. 1234) 이면 true, 아니라면 false 반환
         for (int i = 0; i < count; i++) {
             if (b % 10 <= minNum) {
                 minNum = b % 10;
