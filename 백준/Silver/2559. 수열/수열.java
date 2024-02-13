@@ -8,8 +8,8 @@ public class Main {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st = new StringTokenizer(br.readLine());
 		int[] arr = new int[Integer.parseInt(st.nextToken())];
-		int sum;
-		int maxSum = Integer.MIN_VALUE;
+		int sum = 0;
+		
 		
 		int days = Integer.parseInt(st.nextToken());
 		
@@ -19,14 +19,18 @@ public class Main {
 			arr[i] = Integer.parseInt(st.nextToken());
 		}
 		
+		for(int i = 0; i < days; i++) {
+			sum += arr[i];
+		}
+		
+		int maxSum = sum;
+		
 		// 배열 돌면서 합 구하기
-		for(int i = 0; i <= arr.length - days; i++) {
-			sum = 0;
-			for(int j = i, day = 0; day < days; day++) {
-				sum += arr[j++];
-			}
-			// 최대값 구하기
-			if(sum > maxSum) maxSum = sum;
+		for(int i = 0; i < arr.length - days; i++) {
+			sum -= arr[i];
+			sum += arr[days + i];
+			
+			maxSum = Math.max(sum, maxSum);
 		}
 		
 		System.out.println(maxSum);
