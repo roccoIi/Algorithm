@@ -9,6 +9,8 @@ import java.util.*;
 * 2. 큐에 2(바이러스) 개수 세서 넣어놓고 사방탐색으로 바이러스 퍼뜨린다.
 * 3. 다 퍼뜨렸으면 0(안전지대) 개수 세서 최댓값 비교한다.
 * 4. 모든 경우의 수를 구할때 더 적은 경우의 수를 구할 수 있을 것 같은데 아이디어가 생각나지 않았다.
+* ------------------------------------------------------------------------------------
+* 5. 모든 경우싀 수 구할 때 배열의 중복탐색을 줄였다.
 */
 public class Main {
     static int[][] dir = {{0, -1, 0, 1}, {1, 0, -1, 0}};
@@ -40,25 +42,27 @@ public class Main {
             }
         }
 
-        dfs(0);
+        dfs(0, 0, 0);
 
         System.out.println(maxSafe);
     }// main End
 
     // 1. 세개의 기둥이 놓이는 모든 경우의 수를 구하고, 기둥 3개 놓았을때 지도 복사해서 bfs
-    static void dfs(int idx){
+    static void dfs(int R, int C, int idx){
         if (idx >= 3) {
             int[][] newMap = copyMap(map);
             bfs(newMap);
             return;
         }
 
-        for (int r = 0; r < N; r++) {
+        for (int r = R; r < N; r++) {
             for (int c = 0; c < M; c++) {
-                if(map[r][c] == 1 || map[r][c] == 2) continue;
-                map[r][c] = 1;
-                dfs(idx+1);
-                map[r][c] = 0;
+                if((R != 0 || C != 0) && (r == R && c <= C)) continue;
+                if(map[r][c] == 0){
+                    map[r][c] = 1;
+                    dfs(r, c, idx+1);
+                    map[r][c] = 0;
+                }
             }
         }
     } // dfs End
