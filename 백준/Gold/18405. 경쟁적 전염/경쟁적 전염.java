@@ -1,18 +1,16 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
- * [정리 - target Virus 가 1일경우 가정]
- * 1. 전체 배열을 돌면서 1일 때 큐에 해당 좌표를 노드로 저장
- * 2. 위치를 이동하면서 경계를 벗어나지 않고 해당 위치가 0일때 1로 변경
- * 3. 그 외의 경우에느 아무런 행동을 하지 않음
- * 4. 2번과 3번 행동이 끝난 후에 다시 큐에 노드를 넣지 않고 그대로 진행
- * 5. 1~4 과정을 바이러스의 번호만큼 반복한다.
- * 6. 5번 과정을 주어진 초만큼 반복하면서 정답 좌표에 0이 아닌 값이 있을때 바로 종료하고 출력
+ * [정리]
+ * 1. 전체 배열을 입력받으면서 0이 아닌숫자(바이러스)가 들어왔을때 해당인덱스에 들어있는 큐에 좌표를 넣는다.
+ * 2. qArr배열의 각 index에 들어있는 큐는 해당 바이러스의 최전선에 위치한 좌표이다.
+ * 3. 해당 queue 사이즈만큼만 for 문을 돌면서 사방탐색 위치의 값이 0일때 해당 바이러스 번호로 변화시키고
+ *    이동한 위치의 좌표를 큐에 넣는다.
+ * 4. 그게 아니라면(0이 아닌 숫자) 해당 좌표는 날린다.
+ * 5. 목표로 하는 위치의 값이 0이 아닐때 즉시 종료 후 출력한다.
  */
 
 class Node{
@@ -37,10 +35,19 @@ public class Main {
 
         arr = new int[N][N];
 
+        Queue<Node>[] qArr = new Queue[K+1];
+        for (int i = 1; i <= K; i++) {
+            qArr[i] = new LinkedList<>();
+        }
+
+
         for (int r = 0; r < N; r++) {
             st = new StringTokenizer(br.readLine());
             for (int c = 0; c < N; c++) {
                 arr[r][c] = Integer.parseInt(st.nextToken());
+                if(arr[r][c] != 0){
+                    qArr[arr[r][c]].add(new Node(r, c));
+                }
             }
         }
 
@@ -48,12 +55,12 @@ public class Main {
         int S = Integer.parseInt(st.nextToken());
         int X = Integer.parseInt(st.nextToken());
         int Y = Integer.parseInt(st.nextToken());
-        
+
 //      ---------------------여기까지 입력값 받기----------------------------
 
     end:for (int time = 1; time <= S; time++) { // 주어진 초만큼 반복
-            for (int i = 1; i <= K; i++) { // 바이러스 수만큼 돌면서 각 번호의 바이러스들을 모두 bfs돈다. 
-                bfs(i);
+            for (int i = 1; i <= K; i++) { // 바이러스 수만큼 돌면서 각 번호의 바이러스들을 모두 bfs돈다.
+                bfs(i, qArr[i]);
                 if(arr[X-1][Y-1] != 0) break end; // 하나 끝났을때 해당 위치가 0이 아니라면 즉시 종료 후 출력
             }
         }
@@ -62,18 +69,11 @@ public class Main {
 
     }
 
-    static void bfs(int target){
-        Queue<Node> q = new LinkedList<>();
+    static void bfs(int target, Queue<Node> q){
+        // 현재 들어와있는 큐 사이즈만큼만 돌아볼 예정이다.
+        int size = q.size();
 
-        for (int r = 0; r < N; r++) {
-            for (int c = 0; c < N; c++) {
-                if(arr[r][c] == target) { // target 번호 바이러스 좌표를 전부 큐에 넣는다.
-                    q.offer(new Node(r, c));
-                }
-            }
-        }
-
-        while (!q.isEmpty()){
+        for(int i = 0; i < size; i++){
             Node node = q.poll();
 
             for (int d = 0; d < 4; d++) {
@@ -81,8 +81,12 @@ public class Main {
                 int nc = node.c + dir[1][d];
 
                 // 이동한 좌표가 0이라면 target 번호로 변경하고 그게 아니라면 패스한다.
-                // 다시 큐에 넣지는 않는다.
-                if(check(nr, nc) && arr[nr][nc] == 0) arr[nr][nc] = target;
+                // 0을 target 번호로 변경했을때 해당 위치가 해당 바이러스 번호 최전선에 위치해 있으므로
+                // 다시 큐에 넣는다.
+                if(check(nr, nc) && arr[nr][nc] == 0) {
+                    arr[nr][nc] = target;
+                    q.add(new Node(nr, nc));
+                }
             }
         }
     }
