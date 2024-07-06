@@ -1,108 +1,88 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.io.*;
+import java.util.*;
 
-class Node{
-	Node up;
-	int num;
-	Node left;
-	Node right;
-	
-	Node(){}
-	
-	Node(int num){
-		this.num = num;
-	}
+/**
+ * 문제 기록
+ * - 정점의 개수 V(10 ≤ V ≤ 10000)와 간선의 개수 E, 공통 조상을 찾는 두 개의 정점 번호
+ * - 두 번째 줄에는 E개 간선이 나열 (부모 자식 순서)
+ */
 
-}
 
 public class Solution {
-	static int N, lines, targetNum1, targetNum2, root, sum;
-	static List<Integer> list1;
-	static  List<Integer> list2;
-	
-	public static void main(String[] args) throws IOException {
-		StringBuilder sb; StringTokenizer st;	
+    static int V, E, node_1, node_2;
+    static List<Integer> ancestorA, ancestorB;
+    static Node[] node;
+    static class Node{
+        List<Integer> children;
+        int parents;
+
+        public Node() {
+            this.children = new ArrayList<>();
+            this.parents = 0;
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+        StringTokenizer st;
 
-		int testCase = Integer.parseInt(br.readLine());
-		for(int i = 1; i <= testCase ; i++) {
-			st = new StringTokenizer(br.readLine());
-			int child; int parent;
-			N = Integer.parseInt(st.nextToken());
-			lines = Integer.parseInt(st.nextToken());
-			targetNum1 = Integer.parseInt(st.nextToken());
-			targetNum2 = Integer.parseInt(st.nextToken());
-			list1 = new ArrayList<>();
-			list2 = new ArrayList<>();
+        int testCase = Integer.parseInt(br.readLine());
 
-			
-			Node [] nodes = new Node[N+1];
-			int[] roots = new int[N+1];
-			
-			for(int j = 1; j <= N; j++) {
-				nodes[j] = new Node(j);
-			}
-			
-			// 자식노드를 입력함과 동시에 부모노드 주소까지 넣어준다.
-			st = new StringTokenizer(br.readLine());
-			for(int j = 1; j <= lines; j++) {
-				parent = Integer.parseInt(st.nextToken());
-				child = Integer.parseInt(st.nextToken());
-				roots[child]++;
-				if(nodes[parent].left == null) {
-					nodes[parent].left = nodes[child];
-					nodes[child].up = nodes[parent];
-				} else {
-					nodes[parent].right = nodes[child];
-					nodes[child].up = nodes[parent];
+        for (int T = 1; T <= testCase; T++) {
+            sb.append("#").append(T).append(" ");
+            st = new StringTokenizer(br.readLine());
+            V = Integer.parseInt(st.nextToken());
+            E = Integer.parseInt(st.nextToken());
+            node_1 = Integer.parseInt(st.nextToken());
+            node_2 = Integer.parseInt(st.nextToken());
+            ancestorA = new ArrayList<>();
+            ancestorB = new ArrayList<>();
 
-				}
-			}
+            node = new Node[V+1];
+            for (int i = 0; i <= V; i++) {
+                node[i] = new Node();
+            }
 
-			// 각 타겟의 조상노드들을 리스트에 저장 후 비교하면서 가장 먼저 일치하는 노드 출력 (내림차순으로 리스트에 저장되어있음)
-			addList(nodes[targetNum1], list1);
-			addList(nodes[targetNum2], list2);
-			int a = -1;
-			end:for(int r = 0; r < list1.size(); r++) {
-				for(int c = 0; c < list2.size(); c++) {
-					if(list1.get(r) - list2.get(c) == 0) {
-						a = list1.get(r);
-						break end;
-					}
-				}
-			}
-			
-			// 서브트리 합
-			sum = 0;
-			count(nodes[a]);
-			
-			//출력
-			sb = new StringBuilder();
-			sb.append("#").append(i).append(" ").append(a).append(" ").append(sum);
-			System.out.println(sb);
-		}
-	}
-	
-	static void addList(Node node, List<Integer> list) {
+            st = new StringTokenizer(br.readLine());
+            for (int i = 0; i < E; i++) {
+                int p = Integer.parseInt(st.nextToken());
+                int c = Integer.parseInt(st.nextToken());
 
-		if(node == null) return; // 루트노드 찾을때까지
-		
-		list.add(node.num); // 루트노드가 아니라면 리스트에 해당 num 추가
-		addList(node.up, list); // 부모노드 따라 올라온다.
-		
-	}
-	
-	static void count(Node node) {
-		
-		if(node == null) return;
-		
-		count(node.left);
-		sum++;
-		count(node.right);
-		
-	}
+                node[p].children.add(c);
+                node[c].parents = p;
+            }
+
+            // node_1과 node_2의 모든 조상들 구하기
+            findAncestor(node_1, ancestorA);
+            findAncestor(node_2, ancestorB);
+
+            // LCA 찾기
+            int answer = 0;
+            for (int i = 0; i < V; i++) {
+                if(!ancestorA.get(i).equals(ancestorB.get(i))) break;
+                answer = ancestorA.get(i);
+            }
+
+            sb.append(answer).append(" ").append(countChild(answer)).append("\n");
+        }
+        System.out.println(sb);
+    } //main End
+
+    // 자식 개수 세기
+    static int countChild(int num) {
+        int count = 1;
+        for (int i = 0; i < node[num].children.size(); i++) {
+            count += countChild(node[num].children.get(i));
+        }
+        return count;
+    }
+
+    static void findAncestor(int num, List<Integer> ancestor) {
+        int parent = node[num].parents;
+        if (parent != 0) {
+            findAncestor(parent, ancestor);
+        }
+        ancestor.add(num);
+    }
 }
