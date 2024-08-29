@@ -75,8 +75,8 @@ public class Main {
 			fireBall fireball = q.poll();
 			r = (fireball.node.r + (dir[0][fireball.direction] * fireball.speed)) % N;
 			c = (fireball.node.c + (dir[1][fireball.direction] * fireball.speed)) % N;
-			nr = (r < 0 ? r + N : r) % N;
-			nc = (c < 0 ? c + N : c) % N;
+			nr = (r < 0 ? r + N : r) ;
+			nc = (c < 0 ? c + N : c) ;
 			// 만약 해당 좌표에 다른 파이어볼이 들어있지 않다면 추가하고 해당 좌표를 기억한다.
 			if(list[nr][nc].isEmpty()) {
 				list[nr][nc].add(new fireBall(new Node(nr, nc), fireball.value, fireball.speed, fireball.direction));
