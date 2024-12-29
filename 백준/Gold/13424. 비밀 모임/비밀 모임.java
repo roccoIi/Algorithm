@@ -30,6 +30,7 @@ public class Main {
 				map[i] = new ArrayList<>();
 			}
 			
+			// 양방향 입력
 			for(int i = 0; i < path; i++) {
 				st = new StringTokenizer(br.readLine());
 				int roomA = Integer.parseInt(st.nextToken());
@@ -40,14 +41,19 @@ public class Main {
 				map[roomB].add(new Node(roomA, distance));
 			}
 			
+			// 각 친구들의 지점별 최단거리 저장할 배열 생성
 			int friendsCnt = Integer.parseInt(br.readLine());
 			int[][] friends = new int[friendsCnt][room+1];
 			
+			// 다익스트라 알고리즘을 통해 해당 친구들의 지점별 최단거리 저장
 			st = new StringTokenizer(br.readLine());
 			for(int i = 0; i < friendsCnt; i++) {
 				friends[i] = dijkstra(Integer.parseInt(st.nextToken()));
 			}
 			
+			// 저장된 인원별, 지점별 최단거리 배열을 기준으로
+			// 모든 친구들의 지점별 거리가 가장 적은 지점을 탐색한다.
+			// 단, 거리가 같을 경우 지점 번호가 낮은것을 출력한다.
 			int minDist = Integer.MAX_VALUE;
 			int answer = 0;
 			for(int i = 1; i <= room; i++) {
@@ -55,6 +61,8 @@ public class Main {
 				for(int j = 0; j < friendsCnt; j++) {
 					tmp += friends[j][i];
 				}
+				
+				// 최소거리 찾기 + 같을경우 낮은 번호 우선
 				if(minDist > tmp) {
 					minDist = tmp;
 					answer = i;
@@ -82,10 +90,10 @@ public class Main {
 		while(!pq.isEmpty()) {
 			Node curr = pq.poll();
 			
+			// 방문한 지점일 경우 패쓰, 미방문일 경우 방문체크 후 진행
 			if(visited[curr.point]) continue;
 			visited[curr.point] = true;
-			
-			
+
 			for(Node next : map[curr.point]) {
 				// [거리 갱신 조건]
 				// 1) 지금 방문 하려는 노드가 방문이력이 없을 것!
