@@ -52,11 +52,11 @@ public class Main {
 	}
 	
 	// 두 노드의 부모를 찾고 합친다.
+	// 경로압축을 통해 바로 부모노드를 찾을 수 있으므로 굳이 랭크비교는 하지 않았다.
 	static void unionSet(int x, int y) {
 		x = findSet(x);
 		y = findSet(y);
 		
-		if(x < y) parents[y] = x;
-		else parents[x] = y;
+		parents[y] = x;
 	}
 }
