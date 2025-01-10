@@ -145,11 +145,14 @@ public class Main {
 	// 각 c좌표값별로 가장 하단에 위치한 r값들을 아래로 한칸씩 내려가면서
 	// 다른 미네랄을 만나거나 경계값에 도달하는 가장 최소값을 찾는다.
 	static int minimumFalling () {
+		
+		// 현재 떨어지려고 하는 클러스터를 지도에 표시한다.
 		int[][] tmpMap = new int[R][C];
 		for(Node curr : list) {
 			tmpMap[curr.r][curr.c] = 1; 
 		}
 		
+		// 떨어지면서 x를 만났을 때, 그 x가 떨어지는 클러스터의 x인지 다른 x인지를 확인한다.
 		int answer = R;
 		for(Node curr : list) {
 			int tmp = 0;
@@ -167,26 +170,6 @@ public class Main {
 		}
 		return answer;
 	}
-	
-	
-	// 공중부양중인 미네랑덩어리들의 좌표에서 c값 key로 하면서 가장 하단의 r값을 value로 가지는 map생성
-	static HashMap<Integer, Integer> lowestR(){
-		HashMap<Integer, Integer> map = new HashMap<>();
-		
-		for(int i = 0; i < list.size(); i++) {
-			if(map.containsKey(list.get(i).c)) {
-				int nowR = map.get(list.get(i).c);
-				int newR = list.get(i).r;
-				if(newR > nowR) {
-					map.replace(list.get(i).c, newR);
-				}
-			} else {
-				map.put(list.get(i).c, list.get(i).r);
-			}
-		}
-		return map;
-	}
-		
 	
 	// 새로 생성한 r, c값이 경계를 벗어나는지 확인
 	static boolean checkBoundary(int r, int c) {
