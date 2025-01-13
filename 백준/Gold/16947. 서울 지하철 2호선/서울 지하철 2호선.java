@@ -2,34 +2,19 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-	static class Node{
-		int now, last;
-		
-		Node(int now, int last){
-			this.last = last;
-			this.now = now;
-		}
-	}
-	static class Station{
-		int number, dist;
-		
-		Station(int number, int dist){
-			this.number = number;
-			this.dist = dist;
-		}
-	}
-	final static int INF = 987654321;
-	static int N, circulateGraph[];
+	static int N, dist[], prev[], startPoint;
 	static ArrayList<Integer>[] list;
-	static boolean[] visited;
+	static boolean[] visited, isCycle;
 	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));		
 		StringBuilder sb = new StringBuilder();
 		
 		N = Integer.parseInt(br.readLine());
 		visited = new boolean[N+1];
-		circulateGraph = new int[N+1];
-		Arrays.fill(circulateGraph, INF);
+		isCycle = new boolean[N+1];
+		dist = new int[N+1];
+		prev = new int[N+1];
+		Arrays.fill(dist, -1);
 		
 		// 연결리스트 초기화
 		list = new ArrayList[N+1];
@@ -46,76 +31,77 @@ public class Main {
 			list[station_2].add(station_1); // 양방향
 		}
 		
-		// 순환노선 전처리 진행 (set에 지금까지 지나온 역을 저장하고, 순환이 확인될 경우 해당 역들 체크)
-		for(int i = 1; i <= N; i++) {
-			if(visited[i]) continue;
-			HashSet<Integer> set = new HashSet<>();
-			set.add(i);
-			findCirculate(i, i, 0, set, false);
-		}
+		visited[1] = true;
+		findCycle(1);
+		countDistance();
 		
-		// 순환노선이 아닌 역들만 거리계산 진행
 		for(int i = 1; i <= N; i++) {
-			if(circulateGraph[i] == INF) caculateDistance(new Station(i, 0));
+			sb.append(dist[i]).append(" ");
 		}
-		
-		// 전체 정답을 출력한다.
-		for(int i = 1; i <= N; i++) {
-			sb.append(circulateGraph[i]).append(" ");
-		}
-		
 		System.out.println(sb);
+		
+		
+		
 	}
 	
-	// 현재 지하철 역에서 순환노선까지의 거리 측정 (BFS 구현)
-	static void caculateDistance(Station start) {
-		Queue<Station> q = new LinkedList<>();
-		boolean[] visit = new boolean[N+1];
-		visit[start.number] = true;
-		q.add(start);
+	static boolean findCycle(int now) {
+		for(int next : list[now]) {
+			// 바로 직전에 탐색한 정점과 동일할경우 패쓰
+			if(next == prev[now]) {
+				continue;
+			}
+			
+			// 만약 방문했던 정점을 다시 방문했다면 사이클이 생성되었다.
+			if(visited[next]) {
+				
+				// 사이클에 들어가기 직전의 정점을 아래의 while문의 앤드포인트로 잡는다.
+				// startPoint는 사이클이 시작되는 그 분기점으로 잡는다. 해당 지점에서 여러갈래로 퍼져나가며
+				// 사이클의 거리를 측정할 예정이다.
+				int endCycle = prev[next];
+				startPoint = next;
+				
+				while(now != endCycle) {
+					isCycle[now] = true;
+					now = prev[now];
+				}
+				return true;
+			}
+			
+			// 여기까지 왔다면 다음 정점을 탐색하러 들어간다.
+			// 다음 정점의 이전이 지금임을 표시하고 방문제크 후 dfs
+			prev[next] = now;
+			visited[next] = true;
+			if(findCycle(next)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+	
+	static void countDistance() {
+		Queue<Integer> q = new LinkedList<>();
+		q.add(startPoint);
+		dist[startPoint] = 0;
 		
 		while(!q.isEmpty()) {
-			Station curr = q.poll();
+			int curr = q.poll();
 			
-			for(int num : list[curr.number]) {
-				if(visit[num]) continue;
+			// 다음 탐색할 지역의 거리가 -1이 아니라면 이미 초기화 됐으므로 넘어간다.
+			for(int next : list[curr]) {
+				if(dist[next] != -1) continue;
 				
-				if(circulateGraph[num] == 0) {
-					circulateGraph[start.number] = circulateGraph[start.number] > curr.dist + 1 ? curr.dist + 1 : circulateGraph[curr.number];
-					return;
-				} else {
-					visit[num] = true;
-					q.add(new Station(num, curr.dist + 1));
+				// 사이클의 한 지점에서 시작했으므로 한번 사이클을 벗어나면 다시 사이클에 돌아올 일은 없다.
+				// 그러므로 초기는 0으로 초기화하되, 사이클이 아닌 곳을 마주한다면 현재 거리에서 +1
+				// 현재 거리에 해당 거리를 입력하고 다음으로 넘어간다.
+				int nextDist = 0;
+				if(!isCycle[next]) {
+					nextDist = dist[curr] + 1;
 				}
+				
+				dist[next] = nextDist;
+				q.add(next);
 			}
-		}
-	}
-	
-	// 순환노선 찾는 전처리 과정 (DFS 구현)
-	static void findCirculate(int start, int now, int last, HashSet<Integer> set, boolean check) {
-		// 이미 싸이클 찾았으면 종료
-		if(check) return;
-		
-		for(int num : list[now]){
-			
-			// 바로 직전과 동일하거나 이미 방문했다면 패쓰
-            if(num == last || visited[num]) continue;
-            
-			// 진입지점과 동일한 숫자라면 사이클이 발생했음을 의미한다.
-			if(num == start) {			
-				set.forEach(number -> circulateGraph[number] = 0);
-				check = true;
-				return;				
-			}
-
-			// 위에서 종료되지 않았다면 다음 역으로 진행한다.
-			visited[num] = true;
-			set.add(num);
-			findCirculate(start, num, now, set, false); // 시작, 현재, 과거, set, boolean
-			set.remove(num);
-			
-			// 만약 순환노선을 찾고 돌아왔다면 방문해제를 하지 않는다.
-			if(circulateGraph[num] != 0) visited[num] = false;
 		}
 	}
 }
