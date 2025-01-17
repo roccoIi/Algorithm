@@ -9,51 +9,22 @@ public class Main {
 		int N = Integer.parseInt(st.nextToken());
 		double P = Double.parseDouble(st.nextToken());
 		
-		// 리스트-배열 생성
-		ArrayList<Integer>[] list = new ArrayList[N+1];
-		for(int i = 1; i <= N; i++) {
-			list[i] = new ArrayList<>();
-		}
+		// 각 정점들의 진입차수를 저장할 배열
+		int[] arr = new int[N+1];
 		
-		// 정점들간의 간선 정보를 입력받는다.(양방향)
+		// 정점들간의 간선 정보를 입력받으면서 진입차수를 누적한다.
 		for(int i = 1; i < N; i++) {
 			st = new StringTokenizer(br.readLine());
-			int start = Integer.parseInt(st.nextToken());
-			int end = Integer.parseInt(st.nextToken());
-			list[start].add(end);
-			list[end].add(start);
+			arr[Integer.parseInt(st.nextToken())]++;
+			arr[Integer.parseInt(st.nextToken())]++;
 		}
 		
-		// 이어진 간선이 없을 경우 해당 정점은 리프노드이다.
-		int leafCnt = countLeafNode(list, N, 1);
-		
-		System.out.println(P / leafCnt);
-		
-	}
-	
-	// bfs로 돌면서 리프노드를 탐색한다.
-	static int countLeafNode(ArrayList<Integer>[] list, int N, int start) {
-		Queue<Integer> q = new LinkedList<>();
-		boolean[] visited = new boolean[N+1];
-		visited[start] = true;
-		q.add(start);
-		
+		// 2번 정점부터 진입차수가 1일 경우 해당 정점은 리프노드이다.
 		int leafCnt = 0;
-		
-		while(!q.isEmpty()) {
-			int curr = q.poll();
-			boolean isLeaf = true; // 큐에 정점을 넣지 않았을경우에만 리프노드이다.
-			
-			for(int num : list[curr]) {
-				if(visited[num]) continue;
-				visited[num] = true;
-				
-				q.add(num);
-				isLeaf = false;
-			}
-			
-			if(isLeaf) leafCnt++;
+		for(int i = 2; i <= N; i++) {
+			if(arr[i] == 1) leafCnt++; 
 		}
-		return leafCnt;
+
+		System.out.println(P / leafCnt);
 	}
 }
