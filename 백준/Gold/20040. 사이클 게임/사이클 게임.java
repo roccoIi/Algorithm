@@ -39,6 +39,7 @@ public class Main {
 		x = findSet(x);
 		y = findSet(y);
 		
-		parents[y] = x;
+		if(x < y) parents[y] = x;
+		else parents[x] = y;
 	}
 }
