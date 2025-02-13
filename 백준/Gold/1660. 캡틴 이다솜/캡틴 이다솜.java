@@ -8,14 +8,16 @@ public class Main {
 		int N = Integer.parseInt(br.readLine());
 		
 		// 각층별 대포알의 누적 갯수
-		ArrayList<Integer> sum = new ArrayList<>();
-		sum.add(1);
-		sum.add(4);
-		int idx = sum.size() - 1; // 
-		while(sum.get(idx) <= N) {
-			int newNum = sum.get(idx) + (sum.get(idx) - sum.get(idx - 1) + (idx + 2));
-			sum.add(newNum);
-			idx++;
+		int[] sum = new int[122];
+		sum[0] = 1;
+		sum[1] = 4;
+		int maxIdx = 0;
+		for(int i = 2; i < 122; i++) {
+			sum[i] = sum[i-1] + (sum[i-1] - sum[i-2] + (i + 1));
+			if(sum[i] >= N) {
+				maxIdx = i;
+				break;
+			}
 		}
 		
 		// dp배열 초기화 (모두 1개인 대포알로 구성했을때로 가정)
@@ -24,12 +26,9 @@ public class Main {
 			dp[i] = i;
 		}
 		
-		for(int i = 1; i < sum.size(); i++) {
-			int num = sum.get(i);
-			
-			// j - num < 0 이면 어차피 갱신 안된다.
-			for(int j = num; j <= N; j++) {
-				dp[j] = Math.min(dp[j], dp[j - num] + 1);
+		for(int i = 1; i <= maxIdx; i++) {
+			for(int j = sum[i]; j <= N; j++) {
+				dp[j] = Math.min(dp[j], dp[j - sum[i]] + 1);
 			}
 		}
 		
