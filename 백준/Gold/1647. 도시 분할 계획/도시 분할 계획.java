@@ -11,53 +11,61 @@ public class Main {
 			this.cost = cost;
 		}
 	}
+	static int N, M, parents[];
 	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st = new StringTokenizer(br.readLine());
 		
-		int N = Integer.parseInt(st.nextToken());
-		int M = Integer.parseInt(st.nextToken());
+		N = Integer.parseInt(st.nextToken());
+		M = Integer.parseInt(st.nextToken());
 		
-		List<Node>[] adjList = new ArrayList[N+1];
+		parents = new int[N+1];
 		for(int i = 1; i <= N; i++) {
-			adjList[i] = new ArrayList<>();
+			parents[i] = i;
 		}
 		
+		PriorityQueue<Node> pq = new PriorityQueue<>(
+				(s1, s2) -> Integer.compare(s1.cost, s2.cost));
 		for(int i = 0; i < M; i++) {
 			st = new StringTokenizer(br.readLine());
 			int A = Integer.parseInt(st.nextToken());
 			int B = Integer.parseInt(st.nextToken());
-			int cost = Integer.parseInt(st.nextToken());
-			adjList[A].add(new Node(A, B, cost));
-			adjList[B].add(new Node(B, A, cost));
+			int C = Integer.parseInt(st.nextToken());
+			pq.add(new Node(A, B, C));
 		}
-		
-		// 1번 마을부터 시작한다. 해당 마을에서 갈 수 있는 마을들을 우선순위 큐에 넣는다.
-		// 우선순위의 조건은 유지비가 낮은순서부터다 (유지비 기준 오름차순)
-		PriorityQueue<Node> pq = new PriorityQueue<>(
-				(s1, s2) -> Integer.compare(s1.cost, s2.cost));
-		pq.addAll(adjList[1]);
-		
-		// 1번마을부터 시작하므로 1번마을은 방문체크한다.
-		boolean[] visited = new boolean[N+1];
-		visited[1] = true;
 		
 		int answer = 0;
-		int pick = 1;
+		int pick = 0;
 		int maxValue = -1;
-		while(pick != N) {
+		for(int i = 0; i < M; i++) {
 			Node curr = pq.poll();
 			
-			if(visited[curr.end]) continue;
-			visited[curr.end] = true;
+			int x = findSet(curr.start);
+			int y = findSet(curr.end);
 			
-			maxValue = maxValue < curr.cost ? curr.cost : maxValue;
+			// 둘의 부모가 같다는 것은 사이클이라는 의미이다. 넘긴다.
+			if(x == y) continue;
+			
+			unionSet(x, y);
 			answer += curr.cost;
-			pick++;
+			maxValue = Math.max(maxValue, curr.cost);
 			
-			pq.addAll(adjList[curr.end]);
+			if(++pick == N) break;
 		}
-		
 		System.out.println(answer - maxValue);
+	}
+	
+	// x의 부모를 찾는 과정
+	static int findSet(int x) {
+		if(parents[x] == x) return x;
+		else return parents[x] = findSet(parents[x]);
+	}
+	
+	// y의 부모를 x로 만든다. (x에 y를 자식으로 넣겠다)
+	static void unionSet(int x, int y) {
+		x = findSet(x);
+		y = findSet(y);
+		
+		parents[y] = x;
 	}
 }
