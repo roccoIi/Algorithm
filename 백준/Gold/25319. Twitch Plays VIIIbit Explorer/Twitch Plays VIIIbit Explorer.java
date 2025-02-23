@@ -4,18 +4,14 @@ import java.util.*;
 public class Main {
 	static class Node{
 		int r, c;
-		String root;
 		
-		Node(int r, int c, String root){
+		Node(int r, int c){
 			this.r = r;
 			this.c = c;
-			this.root = root;
 		}
 	}
 	static int R, C, S, totalAlpabetNum[], idNum[];
-	static char map[][];
-	static int[][] dir = {{-1, 1, 0, 0}, {0, 0, -1, 1}};
-	static char[] dirCharAt = {'U', 'D', 'L', 'R'};
+	static Queue<Node> position[];
 	static StringBuilder order = new StringBuilder();
 	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -25,15 +21,21 @@ public class Main {
 		C = Integer.parseInt(st.nextToken());
 		S = Integer.parseInt(st.nextToken());
 		totalAlpabetNum = new int[26];
-		map = new char[R][C];
+		position = new ArrayDeque[26];
+		
+		for(int i = 0; i < 26; i++) {
+			position[i] = new ArrayDeque<>();
+		}
+		
 		for(int r = 0; r < R; r++) {
 			String str = br.readLine();
 			for(int c = 0; c < C; c++) {
-				map[r][c] = str.charAt(c);
-				totalAlpabetNum[changeNum(map[r][c])]++;
+				int index = changeNum(str.charAt(c));
+				totalAlpabetNum[index]++;
+				position[index].add(new Node(r, c));
 			}
 		}
-		
+
 		// 아이디에 들어가는 각 철자의 개수 저장하는 배열 idNum
 		idNum = new int[26];
 		String id = br.readLine();
@@ -49,31 +51,49 @@ public class Main {
 		int upgrade = 0;
 		while(isEnough(set)) {			
 			for(int i = 0; i < id.length(); i++) {
-				if(map[location[0]][location[1]] == id.charAt(i)) {
-					totalAlpabetNum[changeNum(id.charAt(i))]--;
-					map[location[0]][location[1]] = '+';
-					order.append('P');
-					continue;
-				}
-				location = findAlpabet(new Node(location[0], location[1], ""), id.charAt(i));
-				if(location == null) break;
+				Node next = position[changeNum(id.charAt(i))].poll();
+				totalAlpabetNum[changeNum(id.charAt(i))]--;
+				move(location[0], location[1], next.r, next.c);
+				order.append('P');
+				location[0] = next.r;
+				location[1] = next.c;
 			}
 			upgrade++;
 		}
 		
-		// 종료지점을 향해서 이동
-		for(int i = 0; i < R - location[0] - 1; i++) {
-			order.append('D');
-		}
-		
-		for(int i = 0; i < C - location[1] - 1; i++) {
-			order.append('R');
-		}
+		move(location[0], location[1], R-1, C-1);
 		
 		// 정답 출력
 		StringBuilder answer = new StringBuilder();
 		answer.append(upgrade).append(" ").append(order.toString().length()).append('\n').append(order);
 		System.out.println(answer);
+	}
+	
+	// (r, c) -> (nr, nc) 로 이동할때 커멘드 입력
+	static void move(int r, int c, int nr, int nc) {
+		if(r > nr) {
+			for(int i = 0; i < r - nr; i++) {
+				order.append('U');
+			}
+		}
+		
+		if(r < nr) {
+			for(int i = 0; i < nr - r; i++) {
+				order.append('D');
+			}
+		}
+		
+		if(c > nc) {
+			for(int i = 0; i < c - nc; i++) {
+				order.append('L');
+			}
+		}
+		
+		if(c < nc) {
+			for(int i = 0; i < nc - c; i++) {
+				order.append('R');
+			}
+		}
 	}
 	
 	// 현재 지도에 ID를 만들 수 있을만큼 알파벳이 충분히 있는가
@@ -82,37 +102,6 @@ public class Main {
 			if(totalAlpabetNum[changeNum(id)] < idNum[changeNum(id)]) return false;
 		}
 		return true;
-	}
-	
-	// target 알파벳을 찾아 bfs로 탐색한다.
-	static int[] findAlpabet(Node node, char target){
-		Queue<Node> q = new LinkedList<>();
-		boolean[][] visited = new boolean[R][C];
-		visited[node.r][node.c] = true; 
-		q.add(node);
-
-		while(!q.isEmpty()) {
-			Node curr = q.poll();
-			
-			for(int d = 0; d < 4; d++) {
-				int nr = curr.r + dir[0][d];
-				int nc = curr.c + dir[1][d];
-				
-				if(!boundaryCheck(nr, nc) || visited[nr][nc]) continue;
-				visited[nr][nc] = true;
-				
-				StringBuilder sb = new StringBuilder(curr.root).append(dirCharAt[d]);
-				if(map[nr][nc] == target) {
-					order.append(sb).append('P');
-					totalAlpabetNum[changeNum(target)]--;
-					map[nr][nc] = '+';
-					return new int[] {nr, nc};
-				} else {
-					q.add(new Node(nr, nc, sb.toString()));
-				}
-			}
-		}
-		return null;
 	}
 	
 	// 범위체크
