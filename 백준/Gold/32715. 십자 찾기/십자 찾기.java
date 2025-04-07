@@ -52,8 +52,8 @@ public class Main {
         
         // 십자가에서 중앙값은 2번 더했기 때문에 십자가라면 dp의 숫자가 4K+2 여야한다.
         int answer = 0;
-        for(int r = 0; r < N; r++) {
-        	for(int c = 0; c < M; c++) {
+        for(int r = K; r < N-K; r++) {
+        	for(int c = K; c < M-K; c++) {
         		if(dp_column[r][c] + dp_row[r][c] == (4*K + 2)) answer++;
         	}
         }
