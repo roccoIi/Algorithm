@@ -3,14 +3,15 @@ import java.util.*;
 
 public class Main {
 	static class Node{
-		int point, cost;
+		int start, end, cost;
 		
-		Node(int point, int cost){
-			this.point = point;
+		Node(int start, int end, int cost){
+			this.start = start;
+			this.end = end;
 			this.cost = cost;
 		}
 	}
-	static int V, E;
+	static int V, E, parents[];
 	static ArrayList<Node>[] list;
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -19,10 +20,17 @@ public class Main {
         V = Integer.parseInt(st.nextToken());
         E = Integer.parseInt(st.nextToken());
         
+        parents = new int[V+1];
+        for(int i = 0; i <= V; i++) {
+        	parents[i] = i;
+        }
+        
         list = new ArrayList[V+1];
         for(int i = 0; i <= V; i++) {
         	list[i] = new ArrayList<>();
         }
+        
+        PriorityQueue<Node> pq = new PriorityQueue<>((s1, s2) -> Integer.compare(s1.cost, s2.cost));
         
         for(int i = 0; i < E; i++) {
         	st = new StringTokenizer(br.readLine());
@@ -30,33 +38,35 @@ public class Main {
         	int end = Integer.parseInt(st.nextToken());
         	int cost = Integer.parseInt(st.nextToken());
         	
-        	list[start].add(new Node(end, cost));
-        	list[end].add(new Node(start, cost));
+        	pq.add(new Node(start, end, cost));
         }
         
-        System.out.println(prim(new Node(1, 0)));
+        System.out.println(kruskal(pq));  
     }
     
-    static int prim(Node node) {
-    	PriorityQueue<Node> pq = new PriorityQueue<>((s1, s2) -> Integer.compare(s1.cost, s2.cost));
-    	boolean[] visited = new boolean[V+1];
-    	
-    	pq.add(node);
+    static int kruskal(PriorityQueue<Node> pq) {
     	int answer = 0;
     	while(!pq.isEmpty()) {
     		Node curr = pq.poll();
     		
-    		if(visited[curr.point]) continue;
-    		visited[curr.point] = true;
-    		
-    		for(Node next : list[curr.point]) {
-    			if(visited[next.point]) continue;
-    			pq.add(next);
-    		}
-    		
+    		if(findSet(curr.start) == findSet(curr.end)) continue;
+    		unionSet(curr.start, curr.end);
     		answer += curr.cost;
     	}
     	
     	return answer;
     }
+    
+    static int findSet(int x) {
+    	if(parents[x] == x) return x;
+    	else return parents[x] = findSet(parents[x]);
+    }
+    
+    static void unionSet(int x, int y) {
+    	x = findSet(x);
+    	y = findSet(y);
+    	
+    	parents[y] = x;
+    }
+    
 }
