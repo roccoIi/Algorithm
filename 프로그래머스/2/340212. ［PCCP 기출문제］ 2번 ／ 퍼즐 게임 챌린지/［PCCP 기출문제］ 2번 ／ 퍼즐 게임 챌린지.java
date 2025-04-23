@@ -28,15 +28,8 @@ class Solution {
                 currTime += (times[i] + times[i-1]) * num;
             }
             currTime += times[i];
-            
             if(currTime > limit) return false;
         }
-        
         return true;
     }
 }
-
-
-// 1) 매개변수로 level을 받아서 이분탐색 진행(true/false)
-
-// 해당 레벨을 통해서 전체 문제를 풀때 제한시간을 벗어나는지 false/true 반환하는 함수
