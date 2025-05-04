@@ -14,15 +14,16 @@ public class Main {
         	arr[i] = Integer.parseInt(br.readLine());
         }
         
-//        int maxNum = -1;
-//        int[] dp = dpLIS(arr);
-//        for(int i = 0; i < N; i++) {
-//        	maxNum = maxNum > dp[i] ? maxNum : dp[i];
-//        }
-//        System.out.println(N - maxNum);
+        int maxNum = -1;
+        int[] dp = dpLIS(arr);
+        for(int num : dp) {
+        	maxNum = Math.max(num, maxNum);
+        }
         
-        int[] dp = binaryLIS(arr);
-        System.out.println(N - len-1);
+        System.out.println(N - maxNum);
+        
+//        int[] dp = binaryLIS(arr);
+//        System.out.println(N - len-1);
 	}
 	
 	// dp를 이용한 LIS(시간복잡도: O(N^2)
@@ -30,9 +31,9 @@ public class Main {
 		int[] dp = new int[N];
 		
 		for(int i = 0; i < N; i++) {
-			dp[0] = 1;
+			dp[i] = 1;
 			for(int j = 0; j < i; j++) {
-				if(arr[i] >= arr[j]) continue;
+				if(arr[i] <= arr[j]) continue;
 				
 				dp[i] = Math.max(dp[i], dp[j]+1);
 			}
