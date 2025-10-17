@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Main {
 	static Deque<Integer>[][] order;
-	static int[][] dir = {{0, 0, 0, -1, 1}, {0, 1, -1, 0, 0}};
+	static final int[][] dir = {{0, 0, 0, -1, 1}, {0, 1, -1, 0, 0}};
 	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st = new StringTokenizer(br.readLine());
@@ -87,7 +87,7 @@ public class Main {
 		else {
 			
 			// 새로운 방향 갱신
-			direction = direction % 2 == 0 ? direction - 1 : direction + 1;
+			direction = (direction & 1) == 0 ? direction - 1 : direction + 1;
 			
 			// 새로 이동하게될 좌표 갱신
 			nr = r + dir[0][direction];
@@ -106,27 +106,17 @@ public class Main {
 	}
 
 	static void redOrWhite(int[][] map, int[][] pieces, int r, int c, int nr, int nc) {
-		//빨강일때
-		if(map[nr][nc] == 1) { 
-			while(!order[r][c].isEmpty()) {
-				int index = order[r][c].pollLast();
-				pieces[index][0] = nr;
-				pieces[index][1] = nc;
-				
-				order[nr][nc].add(index);
-			}	
-		} 
+		int index = 0;
 		
-		// 하양일때
-		else { 
-			while(!order[r][c].isEmpty()) {
-				int index = order[r][c].pollFirst();
-				pieces[index][0] = nr;
-				pieces[index][1] = nc;
-				
-				order[nr][nc].add(index);
-			}
+		while(!order[r][c].isEmpty()) {
+			index = map[nr][nc] == 1 ? order[r][c].pollLast() : order[r][c].pollFirst();
+			
+			pieces[index][0] = nr;
+			pieces[index][1] = nc;
+			
+			order[nr][nc].add(index);
 		}
+
 	}
 	
 	
