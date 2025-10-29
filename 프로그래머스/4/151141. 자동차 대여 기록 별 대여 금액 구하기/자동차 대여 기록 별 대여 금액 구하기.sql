@@ -1,0 +1,29 @@
+-- 코드를 입력하세요
+# SELECT A.HISTORY_ID, B.CAR_TYPE, 
+#         CASE
+#            WHEN DATEDIFF(A.END_DATE, A.START_DATE) >= 90 THEN '90일 이상' 
+#            WHEN DATEDIFF(A.END_DATE, A.START_DATE) >= 30 THEN '30일 이상' 
+#            WHEN DATEDIFF(A.END_DATE, A.START_DATE) >= 7 THEN '7일 이상' 
+#            ELSE NULL
+#         END as 'duration'
+# FROM CAR_RENTAL_COMPANY_RENTAL_HISTORY A
+#     INNER JOIN CAR_RENTAL_COMPANY_CAR B ON A.CAR_ID = B.CAR_ID
+# WHERE B.CAR_TYPE = '트럭';
+
+
+
+SELECT B.HISTORY_ID, 
+        ROUND((DATEDIFF(B.END_DATE, B.START_DATE) + 1) * A.DAILY_FEE * 
+        (1 - IF(C.DISCOUNT_RATE IS NULL, 0, C.DISCOUNT_RATE) / 100), 0) as 'FEE'
+FROM CAR_RENTAL_COMPANY_CAR A 
+    INNER JOIN CAR_RENTAL_COMPANY_RENTAL_HISTORY B ON A.CAR_ID = B.CAR_ID
+    LEFT JOIN CAR_RENTAL_COMPANY_DISCOUNT_PLAN C
+        ON A.CAR_TYPE = C.CAR_TYPE
+        AND C.DURATION_TYPE = (CASE
+                                 WHEN DATEDIFF(B.END_DATE, B.START_DATE) +1 >= 90 THEN '90일 이상' 
+                                 WHEN DATEDIFF(B.END_DATE, B.START_DATE) +1 >= 30 THEN '30일 이상' 
+                                 WHEN DATEDIFF(B.END_DATE, B.START_DATE) +1 >= 7 THEN '7일 이상' 
+                                 ELSE NULL
+                                END)
+WHERE A.CAR_TYPE = '트럭'
+ORDER BY FEE DESC, B.HISTORY_ID DESC
